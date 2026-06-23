@@ -1,0 +1,40 @@
+site_name: py-prompt-injection-2025
+site_description: A black-box prompt injection test harness for LLMs, mapped to OWASP LLM Top 10 2025
+site_url: https://dodibadshah.github.io/py-prompt-injection-2025
+repo_url: https://github.com/DodiBadshah/py-prompt-injection-2025
+repo_name: DodiBadshah/py-prompt-injection-2025
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: blue
+    accent: light blue
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Payload Catalog: payloads.md
+  - OWASP Mapping: owasp.md
+  - CLI Reference: cli.md
+  - Contributing: contributing.md
+  - Roadmap: roadmap.md
+  - Phase 2 Findings: phase2-findings.html
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - tables
+  - toc:
+      permalink: true
