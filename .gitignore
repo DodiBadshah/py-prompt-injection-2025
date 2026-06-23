@@ -14,6 +14,7 @@ mlflow_runs/
 reports/
 *.html
 !llm_probe_2025/reporting/templates/*.j2
+!docs/phase2-findings.html
 .DS_Store
 mlflow.db
 test_apos.py
