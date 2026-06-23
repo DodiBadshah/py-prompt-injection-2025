@@ -15,6 +15,6 @@ reports/
 *.html
 !llm_probe_2025/reporting/templates/*.j2
 .DS_Store
-"mlflow.db" 
-"test_apos.py" 
-"tree.txt" 
+mlflow.db
+test_apos.py
+tree.txt
