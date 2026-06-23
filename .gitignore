@@ -1,0 +1,17 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+mlflow_runs/
+reports/
+*.html
+!llm_probe_2025/reporting/templates/*.j2
+.DS_Store

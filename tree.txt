@@ -1,0 +1,33 @@
+py-prompt-injection-2025/
+├── pyproject.toml
+├── .env.example
+├── .gitignore
+├── llm_probe_2025/
+│   ├── config.py
+│   ├── exceptions.py
+│   ├── schemas.py
+│   ├── adapters/
+│   │   ├── base.py           (LangChain BaseAdapter interface)
+│   │   ├── anthropic_adapter.py  (ChatAnthropic via LangChain)
+│   │   ├── ollama_adapter.py     (ChatOllama via LangChain)
+│   │   └── factory.py            (get_adapter + sanitize_model_name)
+│   ├── payloads/
+│   │   ├── loader.py
+│   │   └── catalog/
+│   │       ├── llm01_prompt_injection.yaml        (6 payloads)
+│   │       ├── llm02_sensitive_info_disclosure.yaml (6 payloads)
+│   │       ├── llm05_improper_output_handling.yaml  (6 payloads)
+│   │       ├── llm06_excessive_agency.yaml          (6 payloads)
+│   │       └── llm07_system_prompt_leakage.yaml     (6 payloads)
+│   ├── scoring/
+│   │   ├── heuristics.py     (Generation 2 detection functions)
+│   │   └── engine.py         (payload-aware routing scorer)
+│   ├── runner/
+│   │   └── runner.py         (LangChain orchestration + MLflow)
+│   ├── reporting/
+│   │   ├── reporter.py
+│   │   └── templates/report.html.j2
+│   └── cli/
+│       └── main.py           (interactive CLI with custom prompt mode)
+└── tests/
+    └── test_suite.py         (46 tests across all layers)

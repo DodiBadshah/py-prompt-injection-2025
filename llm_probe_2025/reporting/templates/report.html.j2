@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Probe 2025 — Security Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #ffffff;
+    color: #1a1f36;
+    line-height: 1.6;
+  }
+
+  /* ── Header: stays dark ── */
+  .header {
+    background: #111827;
+    padding: 2.25rem 3rem 2rem;
+  }
+  .header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+  }
+  .header h1 em {
+    font-style: normal;
+    color: #3b82f6;
+  }
+  .header .subtitle {
+    font-size: 0.72rem;
+    color: #6b7280;
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .header .meta {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .meta-item .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #4b5563;
+  }
+  .meta-item .value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    color: #3b82f6;
+    font-weight: 600;
+    margin-top: 0.1rem;
+  }
+
+  /* ── Stats bar ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+  .stat-card {
+    padding: 1.5rem 2rem;
+    text-align: center;
+    border-right: 1px solid #e5e7eb;
+  }
+  .stat-card:last-child { border-right: none; }
+  .stat-card .number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-card .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #9ca3af;
+    margin-top: 0.4rem;
+  }
+  .stat-card.total  .number { color: #3b82f6; }
+  .stat-card.pass   .number { color: #10b981; }
+  .stat-card.fail   .number { color: #ef4444; }
+  .stat-card.rate   .number { color: #f59e0b; }
+
+  /* colored bottom accent on pass/fail cards */
+  .stat-card.pass { border-top: 3px solid #10b981; }
+  .stat-card.fail { border-top: 3px solid #ef4444; }
+  .stat-card.total { border-top: 3px solid #3b82f6; }
+  .stat-card.rate  { border-top: 3px solid #f59e0b; }
+
+  /* ── Table section ── */
+  .section { padding: 2rem 3rem 4rem; }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+  }
+  thead tr {
+    border-bottom: 2px solid #e5e7eb;
+  }
+  th {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #9ca3af;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  td {
+    padding: 1rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: top;
+    color: #374151;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #f9fafb; }
+
+  /* FAIL row: left stripe, signature element */
+  tbody tr.row-fail td:first-child {
+    border-left: 3px solid #ef4444;
+    padding-left: calc(1rem - 3px);
+  }
+  tbody tr.row-pass td:first-child {
+    border-left: 3px solid #10b981;
+    padding-left: calc(1rem - 3px);
+  }
+
+  /* Payload ID */
+  td.payload-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #3b82f6;
+    white-space: nowrap;
+    min-width: 110px;
+  }
+
+  /* Category */
+  td.category {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: #6b7280;
+    white-space: nowrap;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  .badge.pass   { background: #d1fae5; color: #065f46; }
+  .badge.fail   { background: #fee2e2; color: #991b1b; }
+  .badge.error  { background: #f3f4f6; color: #6b7280; }
+  .badge.high   { background: #fee2e2; color: #991b1b; }
+  .badge.medium { background: #fef3c7; color: #92400e; }
+  .badge.low    { background: #dbeafe; color: #1e40af; }
+
+  /* Score */
+  td.score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .score-pass { color: #10b981; }
+  .score-fail { color: #ef4444; }
+
+  /* Response: plain text, no box, auto height */
+  .response-text {
+    font-size: 0.82rem;
+    color: #4b5563;
+    line-height: 1.6;
+    word-break: break-word;
+  }
+  .response-text::-webkit-scrollbar { width: 3px; }
+  .response-text::-webkit-scrollbar-track { background: transparent; }
+  .response-text::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+
+  /* Flags */
+  .flags {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #ef4444;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    min-width: 160px;
+  }
+  .flags.clean { color: #10b981; }
+
+  /* Footer */
+  .footer {
+    padding: 1.25rem 3rem;
+    background: #111827;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .footer span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: #4b5563;
+    letter-spacing: 0.04em;
+  }
+  .footer .accent { color: #3b82f6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LLM Probe <em>Security</em> Report</h1>
+  <div class="subtitle">py-prompt-injection-2025 &nbsp;·&nbsp; OWASP LLM Top 10 2025 &nbsp;·&nbsp; Black-Box Evaluation</div>
+  <div class="meta">
+    <div class="meta-item"><span class="label">Model</span><span class="value">{{ model }}</span></div>
+    <div class="meta-item"><span class="label">Category</span><span class="value">{{ category_filter }}</span></div>
+    <div class="meta-item"><span class="label">Generated</span><span class="value">{{ generated_at }}</span></div>
+    <div class="meta-item"><span class="label">Adapter</span><span class="value">{{ adapter }}</span></div>
+    <div class="meta-item"><span class="label">Runs</span><span class="value">{{ runs_label }}</span></div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat-card total"><div class="number">{{ total }}</div><div class="label">Total Payloads</div></div>
+  <div class="stat-card pass"><div class="number">{{ passed }}</div><div class="label">Passed</div></div>
+  <div class="stat-card fail"><div class="number">{{ failed }}</div><div class="label">Failed</div></div>
+  <div class="stat-card rate"><div class="number">{{ pass_rate }}</div><div class="label">Pass Rate</div></div>
+</div>
+
+<div class="section">
+  <div class="section-label">Results</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Payload ID</th>
+        <th>Category</th>
+        <th>Severity</th>
+        <th>Verdict</th>
+        <th>Score</th>
+        <th>Model Response</th>
+        <th>Flags</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+      <tr class="{% if r.verdict.value == 'FAIL' %}row-fail{% else %}row-pass{% endif %}">
+        <td class="payload-id">{{ r.payload_id }}</td>
+        <td class="category">{{ r.category }}</td>
+        <td><span class="badge {{ r.severity.value }}">{{ r.severity.value.upper() }}</span></td>
+        <td><span class="badge {{ r.verdict.value.lower() }}">{{ r.verdict.value }}</span>{% if r.verdict_stable is not none and not r.verdict_stable %} <span class="badge medium" title="Verdict varied across runs">UNSTABLE</span>{% endif %}</td>
+        <td class="score {% if r.score == 1.0 %}score-pass{% else %}score-fail{% endif %}">{{ "%.4f"|format(r.score) }}</td>
+	<td><div class="response-text">{{ r.response | e }}</div></td>
+        <td><div class="flags {% if not r.flags %}clean{% endif %}">{% if r.flags %}{{ r.flags | join('\n') }}{% else %}PASS — no flags{% endif %}</div></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  <span>py-prompt-injection-2025 &nbsp;·&nbsp; Phase 2 of 4 &nbsp;·&nbsp; <span class="accent">github.com/DodiBadshah/py-prompt-injection-2025</span></span>
+  <span>OWASP LLM Top 10 2025 &nbsp;·&nbsp; Generation 2 Payload-Aware Scorer</span>
+</div>
+
+</body>
+</html>
